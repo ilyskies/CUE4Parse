@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider.Objects;
@@ -53,9 +54,9 @@ namespace CUE4Parse.FileProvider.Vfs
         public int Mount();
         public Task<int> MountAsync();
         public int SubmitKey(FGuid guid, FAesKey key);
-        public Task<int> SubmitKeyAsync(FGuid guid, FAesKey key);
+        public Task<int> SubmitKeyAsync(FGuid guid, FAesKey key, CancellationToken cancellationToken = default);
         public int SubmitKeys(IEnumerable<KeyValuePair<FGuid, FAesKey>> keys);
-        public Task<int> SubmitKeysAsync(IEnumerable<KeyValuePair<FGuid, FAesKey>> keys);
+        public Task<int> SubmitKeysAsync(IEnumerable<KeyValuePair<FGuid, FAesKey>> keys, CancellationToken cancellationToken = default);
 
         public IAesVfsReader GetArchive(string archiveName, StringComparison comparison = StringComparison.Ordinal);
         public bool TryGetArchive(string archiveName, [MaybeNullWhen(false)] out IAesVfsReader archive, StringComparison comparison = StringComparison.Ordinal);

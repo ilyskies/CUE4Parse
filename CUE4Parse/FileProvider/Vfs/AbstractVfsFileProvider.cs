@@ -256,14 +256,17 @@ namespace CUE4Parse.FileProvider.Vfs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int SubmitKeys(IEnumerable<KeyValuePair<FGuid, FAesKey>> keys) => SubmitKeysAsync(keys).Result;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async Task<int> SubmitKeyAsync(FGuid guid, FAesKey key)
-            => await SubmitKeysAsync(new Dictionary<FGuid, FAesKey> {{ guid, key }}).ConfigureAwait(false);
-        public async Task<int> SubmitKeysAsync(IEnumerable<KeyValuePair<FGuid, FAesKey>> keys)
+        public async Task<int> SubmitKeyAsync(FGuid guid, FAesKey key, CancellationToken cancellationToken = default)
+            => await SubmitKeysAsync(new Dictionary<FGuid, FAesKey> { { guid, key } }, cancellationToken).ConfigureAwait(false);
+        public async Task<int> SubmitKeysAsync(IEnumerable<KeyValuePair<FGuid, FAesKey>> keys, CancellationToken cancellationToken = default)
         {
             var countNewMounts = 0;
             var tasks = new LinkedList<Task<IAesVfsReader?>>();
+
             foreach (var (guid, key) in keys)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 foreach (var reader in _unloadedVfs.Keys.Where(it => it.EncryptionKeyGuid == guid))
                 {
                     if (reader.Game == EGame.GAME_FragPunk && reader.Name.Contains("global")) reader.AesKey = key;
@@ -276,6 +279,7 @@ namespace CUE4Parse.FileProvider.Vfs
                     {
                         try
                         {
+                            cancellationToken.ThrowIfCancellationRequested();
                             reader.MountTo(Files, PathComparer, key, VfsMounted);
                             _unloadedVfs.TryRemove(reader, out _);
                             _mountedVfs[reader] = null;
@@ -286,12 +290,16 @@ namespace CUE4Parse.FileProvider.Vfs
                         {
                             // Ignore this
                         }
+                        catch (OperationCanceledException)
+                        {
+                            // Also ignore cancellation inside task
+                        }
                         catch (Exception e)
                         {
                             Log.Warning(e, $"Uncaught exception while loading pak file {reader.Path.SubstringAfterLast('/')}");
                         }
                         return null;
-                    }));
+                    }, cancellationToken));
                 }
             }
 
