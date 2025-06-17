@@ -722,6 +722,27 @@ namespace CUE4Parse.FileProvider
             var package = LoadPackage(pathName.Item1);
             return package.GetExport<T>(pathName.Item2);
         }
+        
+        public virtual async Task<UObject> LoadObjectAsync(string? objectPath)
+        {
+            bool IsCaseInsensitive = false;
+            if (objectPath == null) throw new ArgumentException("ObjectPath can't be null", nameof(objectPath));
+            var packagePath = objectPath;
+            string objectName;
+            var dotIndex = packagePath.IndexOf('.');
+            if (dotIndex == -1) // use the package name as object name
+            {
+                objectName = packagePath.SubstringAfterLast('/');
+            }
+            else // packagePath.objectName
+            {
+                objectName = packagePath.Substring(dotIndex + 1);
+                packagePath = packagePath.Substring(0, dotIndex);
+            }
+
+            var pkg = await LoadPackageAsync(packagePath);
+            return pkg.GetExport(objectName, IsCaseInsensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async Task<UObject> LoadPackageObjectAsync(string path) => await LoadPackageObjectAsync<UObject>(path).ConfigureAwait(false);

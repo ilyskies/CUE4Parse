@@ -36,7 +36,6 @@ public interface IPackage
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T? GetExportOrNull<T>(string name, StringComparison comparisonType = StringComparison.Ordinal) where T : UObject
         => GetExportOrNull(name, comparisonType) as T;
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public UObject GetExport(string name, StringComparison comparisonType = StringComparison.Ordinal)
         => GetExportOrNull(name, comparisonType) ??
