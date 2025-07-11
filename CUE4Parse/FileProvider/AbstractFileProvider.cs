@@ -1,18 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using CUE4Parse.FileProvider.Objects;
 using CUE4Parse.FileProvider.Vfs;
 using CUE4Parse.MappingsProvider;
 using CUE4Parse.UE4.Assets;
 using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Exports.Internationalization;
+using CUE4Parse.UE4.Exceptions;
 using CUE4Parse.UE4.IO.Objects;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Objects.Engine;
@@ -24,6 +16,15 @@ using CUE4Parse.UE4.VirtualFileSystem;
 using CUE4Parse.Utils;
 using Newtonsoft.Json;
 using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using UE4Config.Parsing;
 
 namespace CUE4Parse.FileProvider
@@ -601,6 +602,11 @@ namespace CUE4Parse.FileProvider
                     throw new NotImplementedException($"type {file.GetType()} is not supported");
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public virtual async Task<T> LoadObjectAsyncTest<T>(string? objectPath) where T : UObject =>
+    await LoadObjectAsync(objectPath) as T ??
+    throw new ParserException("Loaded object but it was of wrong type");
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryLoadPackage(string path, [MaybeNullWhen(false)] out IPackage package)
