@@ -317,9 +317,9 @@ public class UObject : AbstractPropertyHolder
                 }
                 else
                 {
-                    Log.Warning(
-                        "{0}: Unknown property with value {1} but it's zero so we are good",
-                        type, val);
+                    //Log.Warning(
+                    //    "{0}: Unknown property with value {1} but it's zero so we are good",
+                    //    type, val);
                 }
             }
         } while (it.MoveNext());
